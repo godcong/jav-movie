@@ -3,8 +3,8 @@
 usage
 ```
 jav.exe --video #videopath# --output #output#
-videopath is the path where you store the video
-output is the getted video information storage path
+//videopath is the path where you store the video
+//output is the getted video information storage path
 ```
 
 
