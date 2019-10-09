@@ -4,17 +4,27 @@ import (
 	"flag"
 	"fmt"
 	"github.com/javscrape/go-scrape"
+
+	"github.com/javscrape/go-scrape/net"
 	"os"
 	"path/filepath"
 	"strings"
 )
 
 func main() {
+	proxy := flag.String("proxy", "", "set proxy")
 	path := flag.String("video", "./", "set the video path")
 	output := flag.String("output", "./tmp", "set the info output path")
 	flag.Parse()
 	fmt.Println("jav movie running")
 	fmt.Println("read path:", *path)
+	if *proxy != "" {
+		e := net.RegisterProxy("socks5://127.0.0.1:10808")
+		if e != nil {
+			panic(e)
+		}
+	}
+
 	list := getFileNames(*path)
 	for _, n := range list {
 		fmt.Println("name:", n)
