@@ -1,6 +1,8 @@
 # jav-movie
 
-usage
+this tool is a small sister organizing and collecting video information.
+
+## usage ##
 ```
 jav.exe --video #videopath# --output #output#
 //videopath is the path where you store the video
