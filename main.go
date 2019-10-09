@@ -19,7 +19,7 @@ func main() {
 	fmt.Println("jav movie running")
 	fmt.Println("read path:", *path)
 	if *proxy != "" {
-		e := net.RegisterProxy("socks5://127.0.0.1:10808")
+		e := net.RegisterProxy(*proxy)
 		if e != nil {
 			panic(e)
 		}
