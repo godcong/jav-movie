@@ -14,7 +14,7 @@ import (
 func main() {
 	proxy := flag.String("proxy", "", "set proxy")
 	path := flag.String("video", "./", "set the video path")
-	output := flag.String("output", "./tmp", "set the info output path")
+	output := flag.String("output", "./video", "set the info output path")
 	flag.Parse()
 	fmt.Println("jav movie running")
 	fmt.Println("read path:", *path)
