@@ -48,7 +48,7 @@ func main() {
 
 		info, _ := os.Stat(n)
 		if info.IsDir() {
-			e := os.Rename(n, filepath.Join(*output, filepath.Base(n)))
+			e := os.Rename(n, filepath.Join(*output, strings.ToUpper(filepath.Base(n))))
 			if e != nil {
 				fmt.Println("dir error:", e)
 			}
