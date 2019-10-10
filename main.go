@@ -4,6 +4,7 @@ import (
 	"flag"
 	"fmt"
 	"github.com/javscrape/go-scrape"
+	"path"
 
 	"github.com/javscrape/go-scrape/net"
 	"os"
@@ -33,7 +34,7 @@ func main() {
 		}
 		grab2 := scrape.NewGrabJavbus()
 		grab3 := scrape.NewGrabJavdb()
-		s := scrape.NewScrape(grab2, grab3)
+		s := scrape.NewScrape(grab3, grab2)
 		s.Output(*output)
 		s.GrabSample(true)
 		s.ImageCache("")
@@ -54,7 +55,9 @@ func main() {
 			}
 		} else {
 			_ = os.MkdirAll(filepath.Join(*output, strings.ToUpper(getName(n))), os.ModePerm)
-			e := os.Rename(n, filepath.Join(*output, strings.ToUpper(getName(n)), strings.ToUpper(filepath.Base(n))))
+			ext := filepath.Ext(n)
+			name := strings.ToUpper(getName(n))
+			e := os.Rename(n, filepath.Join(*output, name, name+ext))
 			if e != nil {
 				fmt.Println("file error:", e)
 			}
@@ -84,8 +87,14 @@ func getFileNames(path string) (files []string) {
 		}
 		var fullPath string
 		for _, name := range names {
-
 			fullPath = filepath.Join(path, name)
+			fileInfo, e := os.Stat(fullPath)
+			if e != nil {
+				continue
+			}
+			if !fileInfo.IsDir() && !IsVideo(fullPath) {
+				continue
+			}
 			files = append(files, fullPath)
 		}
 	} else {
@@ -105,4 +114,11 @@ func getName(file string) string {
 	}
 	ext := filepath.Ext(file)
 	return strings.TrimSuffix(filepath.Base(file), ext)
+}
+
+// IsVideo ...
+func IsVideo(filename string) bool {
+	video := `.swf,.flv,.3gp,.ogm,.vob,.m4v,.mkv,.mp4,.mpg,.mpeg,.avi,.rm,.rmvb,.mov,.wmv,.asf,.dat,.asx,.wvx,.mpe,.mpa`
+	ext := strings.ToLower(path.Ext(filename))
+	return strings.Index(video, ext) != -1
 }
