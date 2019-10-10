@@ -53,8 +53,8 @@ func main() {
 				fmt.Println("dir error:", e)
 			}
 		} else {
-			_ = os.MkdirAll(filepath.Join(*output, getName(n)), os.ModePerm)
-			e := os.Rename(n, filepath.Join(*output, getName(n), filepath.Base(n)))
+			_ = os.MkdirAll(filepath.Join(*output, strings.ToUpper(getName(n))), os.ModePerm)
+			e := os.Rename(n, filepath.Join(*output, strings.ToUpper(getName(n)), strings.ToUpper(filepath.Base(n))))
 			if e != nil {
 				fmt.Println("file error:", e)
 			}
@@ -84,6 +84,7 @@ func getFileNames(path string) (files []string) {
 		}
 		var fullPath string
 		for _, name := range names {
+
 			fullPath = filepath.Join(path, name)
 			files = append(files, fullPath)
 		}
