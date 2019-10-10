@@ -38,6 +38,11 @@ func main() {
 		if e != nil {
 			panic(e)
 		}
+		if len(*msg) == 0 {
+			fmt.Println("no data:", n)
+			continue
+		}
+
 		for _, m := range *msg {
 			fmt.Printf("message: %+v\n", m)
 		}
