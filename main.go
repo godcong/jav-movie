@@ -34,7 +34,7 @@ func main() {
 		s.Output(*output)
 		s.GrabSample(true)
 		s.ImageCache("")
-		msg, e := s.Find(n)
+		msg, e := s.Find(getName(n))
 		if e != nil {
 			panic(e)
 		}
@@ -68,10 +68,10 @@ func getFileNames(path string) (files []string) {
 		var fullPath string
 		for _, name := range names {
 			fullPath = filepath.Join(path, name)
-			files = append(files, getName(fullPath))
+			files = append(files, fullPath)
 		}
 	} else {
-		files = append(files, getName(path))
+		files = append(files, path)
 	}
 
 	return files
