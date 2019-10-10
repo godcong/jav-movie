@@ -28,6 +28,9 @@ func main() {
 	list := getFileNames(*path)
 	for _, n := range list {
 		fmt.Println("name:", n)
+		if n == "" {
+			continue
+		}
 		grab2 := scrape.NewGrabJavbus()
 		grab3 := scrape.NewGrabJavdb()
 		s := scrape.NewScrape(grab2, grab3)
@@ -41,6 +44,20 @@ func main() {
 		if len(*msg) == 0 {
 			fmt.Println("no data:", n)
 			continue
+		}
+
+		info, _ := os.Stat(n)
+		if info.IsDir() {
+			e := os.Rename(n, filepath.Join(*output, filepath.Base(n)))
+			if e != nil {
+				fmt.Println("dir error:", e)
+			}
+		} else {
+			_ = os.MkdirAll(filepath.Join(*output, getName(n)), os.ModePerm)
+			e := os.Rename(n, filepath.Join(*output, getName(n), filepath.Base(n)))
+			if e != nil {
+				fmt.Println("file error:", e)
+			}
 		}
 
 		for _, m := range *msg {
@@ -80,7 +97,7 @@ func getFileNames(path string) (files []string) {
 func getName(file string) string {
 	info, e := os.Stat(file)
 	if e != nil {
-		return file
+		return ""
 	}
 	if info.IsDir() {
 		return filepath.Base(file)
