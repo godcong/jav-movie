@@ -16,6 +16,7 @@ func main() {
 	proxy := flag.String("proxy", "", "set proxy")
 	path := flag.String("video", "./", "set the video path")
 	output := flag.String("output", "./video", "set the info output path")
+	failed := flag.String("failed", "./failed", "set the failed output path")
 	flag.Parse()
 	fmt.Println("jav movie running")
 	fmt.Println("read path:", *path)
@@ -27,6 +28,7 @@ func main() {
 	}
 
 	list := getFileNames(*path)
+	_ = os.MkdirAll(*failed, os.ModePerm)
 	for _, n := range list {
 		fmt.Println("name:", n)
 		if n == "" {
@@ -44,29 +46,40 @@ func main() {
 		}
 		if len(*msg) == 0 {
 			fmt.Println("no data:", n)
+			e = moveTo(n, *failed)
+			if e != nil {
+				fmt.Println("move error:", e)
+			}
 			continue
 		}
-
-		info, _ := os.Stat(n)
-		if info.IsDir() {
-			e := os.Rename(n, filepath.Join(*output, strings.ToUpper(filepath.Base(n))))
-			if e != nil {
-				fmt.Println("dir error:", e)
-			}
-		} else {
-			_ = os.MkdirAll(filepath.Join(*output, strings.ToUpper(getName(n))), os.ModePerm)
-			ext := filepath.Ext(n)
-			name := strings.ToUpper(getName(n))
-			e := os.Rename(n, filepath.Join(*output, name, name+ext))
-			if e != nil {
-				fmt.Println("file error:", e)
-			}
+		e = moveTo(n, *output)
+		if e != nil {
+			fmt.Println("move error:", e)
 		}
 
 		for _, m := range *msg {
 			fmt.Printf("message: %+v\n", m)
 		}
 	}
+}
+
+func moveTo(file string, path string) error {
+	info, _ := os.Stat(file)
+	if info.IsDir() {
+		e := os.Rename(file, filepath.Join(path, strings.ToUpper(filepath.Base(file))))
+		if e != nil {
+			return e
+		}
+	} else {
+		_ = os.MkdirAll(filepath.Join(path, strings.ToUpper(getName(file))), os.ModePerm)
+		ext := filepath.Ext(file)
+		name := strings.ToUpper(getName(file))
+		e := os.Rename(file, filepath.Join(path, name, name+ext))
+		if e != nil {
+			return e
+		}
+	}
+	return nil
 }
 
 func getFileNames(path string) (files []string) {
