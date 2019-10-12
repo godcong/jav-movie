@@ -118,7 +118,7 @@ func moveBak(file string, path string) (e error) {
 		name := getName(file)
 		ext := filepath.Ext(file)
 
-		target := dir + name + "_" + strconv.Itoa(count) + ext
+		target := filepath.Join(dir, name+"_"+strconv.Itoa(count)+ext)
 		_, e = os.Stat(target)
 		if e != nil && !os.IsNotExist(e) {
 			return e
