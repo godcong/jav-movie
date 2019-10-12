@@ -46,13 +46,13 @@ func main() {
 		}
 		if len(*msg) == 0 {
 			fmt.Println("no data:", n)
-			e = moveTo(n, *failed)
+			e = moveTo(n, *failed, true)
 			if e != nil {
 				fmt.Println("move error:", e)
 			}
 			continue
 		}
-		e = moveTo(n, *output)
+		e = moveTo(n, *output, false)
 		if e != nil {
 			fmt.Println("move error:", e)
 		}
@@ -63,18 +63,29 @@ func main() {
 	}
 }
 
-func moveTo(file string, path string) error {
+func moveTo(file string, path string, fail bool) (e error) {
 	info, _ := os.Stat(file)
 	if info.IsDir() {
-		e := os.Rename(file, filepath.Join(path, strings.ToUpper(filepath.Base(file))))
+		e = os.Rename(file, filepath.Join(path, strings.ToUpper(filepath.Base(file))))
 		if e != nil {
 			return e
 		}
 	} else {
+
 		_ = os.MkdirAll(filepath.Join(path, strings.ToUpper(getName(file))), os.ModePerm)
 		ext := filepath.Ext(file)
 		name := strings.ToUpper(getName(file))
-		e := os.Rename(file, filepath.Join(path, name, name+ext))
+		if fail {
+			info, e = os.Stat(filepath.Join(path, name+ext))
+			if e != nil && !os.IsNotExist(e) {
+				return e
+			}
+			if os.IsNotExist(e) {
+				return os.Rename(file, filepath.Join(path, name+ext))
+			}
+			// exist create dir:name
+		}
+		e = os.Rename(file, filepath.Join(path, name, name+ext))
 		if e != nil {
 			return e
 		}
