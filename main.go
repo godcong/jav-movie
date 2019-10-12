@@ -1,10 +1,12 @@
 package main
 
 import (
+	"errors"
 	"flag"
 	"fmt"
 	"github.com/javscrape/go-scrape"
 	"path"
+	"strconv"
 
 	"github.com/javscrape/go-scrape/net"
 	"os"
@@ -66,31 +68,44 @@ func main() {
 func moveTo(file string, path string, fail bool) (e error) {
 	info, _ := os.Stat(file)
 	if info.IsDir() {
-		e = os.Rename(file, filepath.Join(path, strings.ToUpper(filepath.Base(file))))
-		if e != nil {
-			return e
-		}
-	} else {
-
-		_ = os.MkdirAll(filepath.Join(path, strings.ToUpper(getName(file))), os.ModePerm)
-		ext := filepath.Ext(file)
-		name := strings.ToUpper(getName(file))
-		if fail {
-			info, e = os.Stat(filepath.Join(path, name+ext))
-			if e != nil && !os.IsNotExist(e) {
-				return e
-			}
-			if os.IsNotExist(e) {
-				return os.Rename(file, filepath.Join(path, name+ext))
-			}
-			// exist create dir:name
-		}
-		e = os.Rename(file, filepath.Join(path, name, name+ext))
-		if e != nil {
-			return e
-		}
+		return os.Rename(file, filepath.Join(path, strings.ToUpper(filepath.Base(file))))
 	}
-	return nil
+	_ = os.MkdirAll(filepath.Join(path, strings.ToUpper(getName(file))), os.ModePerm)
+	ext := filepath.Ext(file)
+	name := strings.ToUpper(getName(file))
+
+	target := filepath.Join(path, name, name+ext)
+	if fail {
+		target = filepath.Join(path, name+ext)
+	}
+	_, e = os.Stat(target)
+	if e != nil && !os.IsNotExist(e) {
+		return e
+	}
+	if os.IsNotExist(e) {
+		return os.Rename(file, target)
+	}
+	// exist create dir:name
+	return moveBak(file, target)
+}
+
+func moveBak(file string, path string) (e error) {
+	for count := 1; count < 10; count++ {
+		dir := filepath.Dir(path)
+		name := getName(path)
+		ext := filepath.Ext(name)
+
+		target := dir + name + "_" + strconv.Itoa(count) + ext
+		_, e = os.Stat(target)
+		if e != nil && !os.IsNotExist(e) {
+			return e
+		}
+		if os.IsNotExist(e) {
+			return os.Rename(file, target)
+		}
+		// exist create dir:name
+	}
+	return errors.New("unmoved")
 }
 
 func getFileNames(path string) (files []string) {
