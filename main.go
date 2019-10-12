@@ -70,13 +70,14 @@ func moveTo(file string, path string, fail bool) (e error) {
 	if info.IsDir() {
 		return os.Rename(file, filepath.Join(path, strings.ToUpper(filepath.Base(file))))
 	}
-	_ = os.MkdirAll(filepath.Join(path, strings.ToUpper(getName(file))), os.ModePerm)
 	ext := filepath.Ext(file)
 	name := strings.ToUpper(getName(file))
 
 	target := filepath.Join(path, name, name+ext)
 	if fail {
 		target = filepath.Join(path, name+ext)
+	} else {
+		_ = os.MkdirAll(filepath.Join(path, strings.ToUpper(getName(file))), os.ModePerm)
 	}
 	_, e = os.Stat(target)
 	if e != nil && !os.IsNotExist(e) {
