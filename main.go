@@ -65,16 +65,16 @@ func main() {
 	}
 }
 
-func moveTo(file string, path string, fail bool) (e error) {
+func moveTo(file string, path string, namepath bool) (e error) {
 	info, _ := os.Stat(file)
 	if info.IsDir() {
-		return os.Rename(file, filepath.Join(path, strings.ToUpper(filepath.Base(file))))
+		return moveDir(file, path, namepath)
 	}
 	ext := filepath.Ext(file)
 	name := strings.ToUpper(getName(file))
 
 	target := filepath.Join(path, name, name+ext)
-	if fail {
+	if namepath {
 		target = filepath.Join(path, name+ext)
 	} else {
 		_ = os.MkdirAll(filepath.Join(path, strings.ToUpper(getName(file))), os.ModePerm)
@@ -90,11 +90,33 @@ func moveTo(file string, path string, fail bool) (e error) {
 	return moveBak(file, target)
 }
 
+func moveDir(file string, path string, namepath bool) (e error) {
+	f, e := os.Open(file)
+	if e != nil {
+		return nil
+	}
+	defer f.Close()
+	names, e := f.Readdirnames(-1)
+	if e != nil {
+		return e
+	}
+	var fullPath string
+	for _, name := range names {
+		fullPath = filepath.Join(file, name)
+		e = moveTo(fullPath, path, namepath)
+		if e != nil {
+			fmt.Println("dir error:", file)
+			continue
+		}
+	}
+	return nil
+}
+
 func moveBak(file string, path string) (e error) {
 	for count := 1; count < 10; count++ {
 		dir := filepath.Dir(path)
-		name := getName(path)
-		ext := filepath.Ext(name)
+		name := getName(file)
+		ext := filepath.Ext(file)
 
 		target := dir + name + "_" + strconv.Itoa(count) + ext
 		_, e = os.Stat(target)
