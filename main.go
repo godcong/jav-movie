@@ -42,9 +42,14 @@ func main() {
 		s.Output(*output)
 		s.GrabSample(true)
 		s.ImageCache("")
-		msg, e := s.Find(getName(n))
+		name := getName(n)
+		if mulitiVideos(&name) {
+			fmt.Println("multi:", n)
+		}
+		msg, e := s.Find(name)
 		if e != nil {
-			panic(e)
+			fmt.Println("find error:", e)
+			continue
 		}
 		if len(*msg) == 0 {
 			fmt.Println("no data:", n)
@@ -63,6 +68,15 @@ func main() {
 			fmt.Printf("message: %+v\n", m)
 		}
 	}
+}
+
+func mulitiVideos(name *string) bool {
+	split := strings.Split(*name, "@")
+	if len(split) == 2 {
+		*name = split[0]
+		return true
+	}
+	return false
 }
 
 func moveTo(file string, path string, namepath bool) (e error) {
